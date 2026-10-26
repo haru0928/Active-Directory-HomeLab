@@ -98,5 +98,5 @@ The operational roadmap for promoting this instance into a fully functional Prim
 ## 📜 Documentation & Author
 
 * **Author:** Ricardo Escalante
-* **Portfolio:** [Link to Portfolio Website]
+* **Portfolio:** [[Link to Portfolio Website](https://haru0928.github.io/Ricardo-Portfolio/index.html)]
 * **Target Focus:** Cyberspace Operations / Enterprise Infrastructure Security
