@@ -95,6 +95,12 @@ The operational roadmap for promoting this instance into a fully functional Prim
 
 ---
 
+## 📸 Evidence & Screenshots
+<img width="1090" height="852" alt="AD_Users_and_Computers" src="https://github.com/user-attachments/assets/4ef92f28-927d-4c9c-8438-dc2f61e67019" />
+<img width="1319" height="1023" alt="hostnames_IP_Addresses" src="https://github.com/user-attachments/assets/274536aa-987f-4a05-bdbf-e1d66b67a427" />
+
+
+
 ## 📜 Documentation & Author
 
 * **Author:** Ricardo Escalante
