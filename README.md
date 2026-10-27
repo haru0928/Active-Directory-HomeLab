@@ -1,87 +1,81 @@
-# Enterprise Active Directory Home Lab
+Here is the complete, ready-to-copy Markdown code for your README. You can copy this block directly into the GitHub web editor:
+
+```markdown
+# Enterprise Active Directory Home Lab & Security Baseline
 
 ## 📌 Executive Summary
+This project documents the deployment, configuration, and security management of an enterprise-grade **Active Directory Domain Services (AD DS)** environment using **Windows Server 2022 Standard (Desktop Experience)** and a domain-joined **Windows 11 Client**.
 
-This project documents the deployment, configuration, and security management of an **Active Directory Domain Services (AD DS)** environment using **Windows Server 2022 Standard (Desktop Experience)**.
-
-The lab is designed to simulate enterprise-grade Identity and Access Management (IAM), Directory Services, Group Policy enforcement, and centralized network administration. Constructed on an ARM64 Apple Silicon host via x86_64 virtualization/emulation, this environment demonstrates system administration, cross-architecture virtualization troubleshooting, and infrastructure engineering skills required for modern cyber operations.
+Designed to simulate real-world Identity and Access Management (IAM), Directory Services, Group Policy enforcement, and centralized network administration. Built entirely on an **ARM64 Apple Silicon host via UTM**, this lab demonstrates systems administration, advanced cross-architecture virtualization troubleshooting, and infrastructure engineering skills tailored for modern cyber operations and 17S Cyberspace Operations readiness.
 
 ---
 
 ## 📐 Environment & Hardware Architecture
 
 | Component | Specification / Configuration |
-| --- | --- |
+| :--- | :--- |
 | **Host Hardware** | Apple MacBook Air M4 (macOS / ARM64) |
-| **Hypervisor** | UTM v4.x (QEMU Emulation Engine) |
-| **Machine Profile** | `q35` Standard PC profile with Intel ICH9 chipset |
-| **Guest OS** | Windows Server 2022 Standard Evaluation (`SERVER_EVAL_x64FRE_en-us.iso`) |
-| **CPU / Memory** | 4 x86_64 Cores / 4096 MB RAM |
-| **Storage Architecture** | 64 GiB Virtual NVMe Drive (`QCOW2`) + IDE CD/DVD Mount |
-| **Virtual Network** | Isolated Host-Only / NAT Subnet |
+| **Hypervisor** | UTM v4.x (Hybrid Emulation & Native Virtualization Engines) |
+| **Domain Controller (`DC01`)** | Windows Server 2022 Standard Evaluation (x86_64 via QEMU Emulation) |
+| **Client Workstation (`WIN11-CLI01`)** | Windows 11 ARM64 (Native Apple Virtualization Framework) |
+| **Network Architecture** | UTM Shared Network Subnet (`192.168.64.x`) |
+| **Active Directory Domain** | `corp.local` |
 
 ---
 
 ## 🛠️ Phase 1: Hypervisor Engineering & Boot Optimization
-
-Deploying x86_64 guest operating systems on Apple Silicon hosts introduces specific architectural constraints and boot path challenges. This phase details the system tuning performed during initial deployment:
-
-### Architectural Adjustments & Troubleshooting
-
-1. **EFI Firmware & Architecture Alignment:**
-* Resolved initial QEMU firmware size constraints by standardizing the VM instance on the emulated `q35` system profile.
-
-
-2. **Storage Controller Optimization:**
-* Resolved virtual disk detection issues by configuring a dedicated 64 GiB NVMe virtual drive alongside an IDE CD/DVD optical slot.
-* Cleaned up duplicate bus controllers to eliminate drive ambiguity in QEMU's UEFI bootloader.
-
-
-3. **UEFI Boot File System Routing:**
-* Manually targeted the Windows EFI Boot Manager path (`\EFI\Microsoft\BOOT\bootmgfw.efi`) via the Boot Maintenance Manager when adjusting the NVRAM boot sequence.
-
-
+Deploying x86_64 guest operating systems on Apple Silicon hosts introduces specific architectural constraints. The initial deployment involved:
+* **EFI Firmware & Architecture Alignment:** Standardized the server VM instance on the emulated `q35` system profile with Intel ICH9 chipset to resolve QEMU firmware constraints.
+* **Storage Controller Optimization:** Configured a dedicated 64 GiB NVMe virtual drive alongside an IDE optical slot, cleaning up duplicate bus controllers to eliminate bootloader ambiguity.
+* **UEFI Boot File System Routing:** Manually targeted the Windows EFI Boot Manager path (`\EFI\Microsoft\BOOT\bootmgfw.efi`) via the UEFI Boot Maintenance Manager.
 
 ---
 
-## ⚙️ Phase 2: Core Domain Controller Setup *(In Progress)*
-
-The operational roadmap for promoting this instance into a fully functional Primary Domain Controller (`DC01`) encompasses:
-
-* [x] **Base System Installation:** Windows Server 2022 Desktop Experience baseline installation.
-* [x] **Account Provisioning:** Local Administrator hardening and setup.
-* [ ] **Network Interface Configuration:** Assignment of static IPv4 parameters, Gateway, and loopback DNS binding.
-* [ ] **Hostname & Domain Definition:** Computer rename to `DC01` and promotion to Forest Root Domain (`corp.local` / `lab.local`).
-* [ ] **Identity & Access Management (IAM) Hierarchy:**
-* Custom Organizational Unit (OU) schema implementation (`Executive`, `IT_Ops`, `SecOps`, `Workstations`).
-* Creation of administrative and standard user accounts following the Principle of Least Privilege (PoLP).
-
-
-* [ ] **Group Policy Objects (GPOs):**
-* Centralized password policy enforcement.
-* Audit logging & event collection rules.
-* Local Administrator account control & workstation hardening.
-
-
+## 🏗️ Phase 2: Core Domain Controller & IAM Deployment
+* **Domain Promotion:** Successfully promoted `DC01` to a Primary Domain Controller for the `corp.local` forest root domain with static IPv4 addressing (`192.168.64.10`) and loopback DNS binding.
+* **Identity & Access Management (IAM) Hierarchy:** Implemented a structured custom Organizational Unit (OU) schema enforcing the Principle of Least Privilege (PoLP):
+  * `corp.local/`
+    * `Corp/`
+      * `IT_Ops` (IT Operations personnel)
+      * `SecOps` (Security Operations personnel)
+      * `Users` (Standard enterprise users, e.g., `tuser`)
+      * `Workstations` (Domain-joined client endpoints)
 
 ---
 
-## 🖼️ Network & Active Directory Topology
+## 🌐 Phase 3: Cross-Architecture Networking & Client Integration
+* **The Challenge:** UTM runs x86_64 emulation (`DC01`) and ARM64 native virtualization (`WIN11-CLI01`) on separate backend hypervisor engines, leading to default subnet isolation and packet destination unreachability.
+* **The Resolution:** 
+  * Standardized both VM instances onto UTM's **Shared Network (`192.168.64.x`)**.
+  * Pinned `DC01` to static IP `192.168.64.10`.
+  * Configured the client network adapter (`ncpa.cpl`) with explicit IPv4 DNS pointing to `192.168.64.10` while disabling IPv6 link-local interference (`fe80::...`).
+* **Domain Join:** Successfully joined `WIN11-CLI01` to `corp.local`, verified handshakes via `nslookup` and `ping`, and moved the computer object into the `Workstations` OU.
 
-*(Architecture Diagram to be inserted here — e.g., Mermaid.js or draw.io graphic)*
+---
+
+## 🔒 Phase 4: Security Hardening & Group Policy Enforcement
+To demonstrate endpoint security hardening and defensive posture:
+* **GPO Creation:** Created and linked the `Workstation-Security-Baseline` Group Policy Object directly to the `Workstations` OU.
+* **Account Lockout Policy:** Configured an explicit lockout threshold of **5 invalid logon attempts** to mitigate brute-force vector threats.
+* **Policy Verification:** Forced immediate policy application across the endpoint using `gpupdate /force`.
+
+---
+
+## 🖼️ Network Topology Diagram
 
 ```text
 [ Apple Silicon M4 Host (macOS) ]
        │
-       └── [ UTM / QEMU x86_64 Emulation Layer ]
-                 │
-                 ├── [ Windows Server 2022 (DC01) ]
-                 │     ├── Role: AD DS / DNS / DHCP
-                 │     ├── IP: 192.168.x.x (Static)
-                 │     └── Domain: lab.local
-                 │
-                 └── [ Windows Client Endpoint ] (Planned)
-                       └── Domain-Joined Workstation
+       ├── [ UTM QEMU Emulation Layer ]
+       │     └── [ DC01: Windows Server 2022 ]
+       │           ├── Role: AD DS / DNS / DC
+       │           └── IP: 192.168.64.10 (Static)
+       │           └── Domain: corp.local
+       │
+       └── [ UTM Apple Virtualization Framework ]
+             └── [ WIN11-CLI01: Windows 11 ARM64 ]
+                   ├── Role: Domain-Joined Workstation
+                   └── OU: Workstations
 
 ```
 
@@ -89,9 +83,9 @@ The operational roadmap for promoting this instance into a fully functional Prim
 
 ## 🚀 Key Takeaways & Applied Concepts
 
-* **Identity & Access Management (IAM):** Hands-on experience establishing enterprise directory boundaries, account lifecycles, and access control models.
-* **Virtualization & Emulation:** Advanced configuration of QEMU/UTM storage buses, NVMe controllers, and cross-architecture hardware translation.
-* **Systems Administration:** Deployment of core Microsoft infrastructure protocols (DNS, AD DS, Kerberos, SMB, GPO).
+* **Identity & Access Management (IAM):** Hands-on experience establishing enterprise directory boundaries, OU design, account lifecycles, and access control models.
+* **Virtualization & Hypervisor Troubleshooting:** Advanced configuration of mixed-architecture environments (QEMU x86_64 emulation + ARM64 native virtualization), bridging/subnet routing, and network adapter troubleshooting.
+* **Systems Administration & Hardening:** Deployment of core Microsoft infrastructure protocols (DNS, AD DS, Kerberos, SMB) and proactive security baselining via GPOs.
 
 ---
 
@@ -99,10 +93,7 @@ The operational roadmap for promoting this instance into a fully functional Prim
 <img width="1090" height="852" alt="AD_Users_and_Computers" src="https://github.com/user-attachments/assets/4ef92f28-927d-4c9c-8438-dc2f61e67019" />
 <img width="1319" height="1023" alt="hostnames_IP_Addresses" src="https://github.com/user-attachments/assets/274536aa-987f-4a05-bdbf-e1d66b67a427" />
 
-
-
 ## 📜 Documentation & Author
 
 * **Author:** Ricardo Escalante
-* **Portfolio:** [[Link to Portfolio Website](https://haru0928.github.io/Ricardo-Portfolio/index.html)]
-* **Target Focus:** Cyberspace Operations / Enterprise Infrastructure Security
+* **Target Focus:** Cyberspace Operations / Enterprise Infrastructure Security (17S)
