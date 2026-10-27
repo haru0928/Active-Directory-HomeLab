@@ -1,6 +1,3 @@
-Here is the complete, ready-to-copy Markdown code for your README. You can copy this block directly into the GitHub web editor:
-
-```markdown
 # Enterprise Active Directory Home Lab & Security Baseline
 
 ## 📌 Executive Summary
